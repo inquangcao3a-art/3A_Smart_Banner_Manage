@@ -3,13 +3,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from queue import Empty, SimpleQueue
 from threading import Thread
-import sys
 import tkinter as tk
 from tkinter import filedialog, ttk
-
-from PIL import Image, ImageTk
-
-from verify_assets import verify_assets
 
 from publish_banner import publish
 from smart_banner import MAX_IMAGE, VIETNAM, decode, image_name, play, validate_manifest
@@ -18,18 +13,6 @@ from smart_banner import MAX_IMAGE, VIETNAM, decode, image_name, play, validate_
 def main():
     root = tk.Tk()
     root.title('3A Smart Banner Manager 1.1.0')
-    assets = Path(__file__).resolve().parent / 'assets'
-    verify_assets(assets)
-    with Image.open(assets / 'icon.ico') as icon:
-        root.banner_icon = ImageTk.PhotoImage(icon.convert('RGBA'), master=root)
-    root.iconphoto(True, root.banner_icon)
-    if root.tk.call('tk', 'windowingsystem') == 'win32':
-        root.iconbitmap(default=str(assets / 'icon.ico'))
-    with Image.open(assets / 'logo.png') as logo:
-        logo = logo.convert('RGBA')
-        logo.thumbnail((80, 80), Image.Resampling.LANCZOS)
-        root.banner_logo = ImageTk.PhotoImage(logo, master=root)
-    ttk.Label(root, image=root.banner_logo).pack(pady=(12, 0))
     root.minsize(590, 310)
     form = ttk.Frame(root, padding=20)
     form.pack(fill='both', expand=True)
@@ -129,11 +112,6 @@ def main():
     complete_button = ttk.Button(form, text='Hoàn thành', command=complete)
     complete_button.grid(row=6, column=2, sticky='e')
     ttk.Label(form, textvariable=status, wraplength=510).grid(row=7, column=0, columnspan=3, sticky='w', pady=(9, 0))
-    if len(sys.argv) == 3 and sys.argv[1] == '--verify-build':
-        root.update_idletasks()
-        root.destroy()
-        Path(sys.argv[2]).write_text('PASS: Smart Banner Manager 1.1.0 started', encoding='utf-8')
-        return
     root.mainloop()
 
 

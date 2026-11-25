@@ -12,12 +12,3 @@ công cụ đăng ảnh rồi cập nhật promotion.json. Nút Kết thúc sớ
 Khách cần cài AI Font Finder PRO 7.1.9 một lần. Sau đó mỗi lần mở ứng dụng,
 hệ thống kiểm tra một lần. Khuyến mãi nằm trong khung giá và kết thúc vào
 00:00 sau ngày cuối theo giờ Việt Nam. Cả dùng thử và đã kích hoạt đều thấy ảnh.
-
-ĐÓNG GÓI TRÊN GITHUB WEB
-Tải nội dung ZIP lên thư mục gốc của repo Smart Banner Manager. Giữ nguyên
-assets/ và .github/workflows/build-banner-manager.yml. Chạy workflow
-Build 3A_Smart_Banner_Manage 1.1.0, rồi tải artifact 3A_Smart_Banner_Manage.
-ZIP artifact chứa 3A_Smart_Banner_Manage.exe và 3A_Smart_Banner_Manage_Setup.exe.
-Thử chọn GIF trong examples/ và bấm Xem trước. GIF mẫu 440 × 160 px.
-Xem trước có thể dùng khi chưa nhập token. Chỉ Hoàn thành và Kết thúc sớm
-mới gửi yêu cầu cập nhật GitHub.
