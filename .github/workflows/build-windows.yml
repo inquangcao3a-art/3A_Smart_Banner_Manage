@@ -1,1 +1,93 @@
+name: Build 3A_Smart_Banner_Manage
 
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build EXE and installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          python -m pip install -r requirements.txt 'pyinstaller>=6.16,<7'
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed' }
+
+          python verify_assets.py
+          if ($LASTEXITCODE -ne 0) { throw 'Required banner resources missing or invalid' }
+
+          $icon = (Resolve-Path -LiteralPath 'assets/icon.ico').Path
+          $installer = (Resolve-Path -LiteralPath 'installer.iss').Path
+
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name 3A_Smart_Banner_Manage --icon "$icon" --version-file windows-version.txt --add-data 'assets:assets' smart_banner_manager.py
+          if ($LASTEXITCODE -ne 0) { throw 'Application build failed' }
+
+          $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (!(Test-Path -LiteralPath $compiler)) {
+            choco install innosetup --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed' }
+          }
+
+          & $compiler "/DSetupIcon=$icon" "$installer"
+          if ($LASTEXITCODE -ne 0) { throw 'Installer build failed' }
+
+          Copy-Item 'dist/3A_Smart_Banner_Manage.exe' 'release/'
+
+          foreach ($name in '3A_Smart_Banner_Manage.exe', '3A_Smart_Banner_Manage_Setup.exe') {
+            $info = (Get-Item -LiteralPath "release/$name").VersionInfo
+            if ($info.FileMajorPart -ne 1 -or $info.FileMinorPart -ne 0 -or $info.FileBuildPart -ne 0) {
+              throw "Unexpected version: $name"
+            }
+          }
+
+      - name: Verify packaged and installed application
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          function Test-BannerApp($exe, $report) {
+            $process = Start-Process -FilePath $exe -WorkingDirectory $env:RUNNER_TEMP `
+              -ArgumentList "--verify-build `"$report`"" -PassThru
+            if (!$process.WaitForExit(60000)) {
+              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+              throw "Application did not finish the resource test: $exe"
+            }
+            if ($process.ExitCode -ne 0 -or !(Test-Path -LiteralPath $report)) {
+              throw "Resource test failed for $exe (exit $($process.ExitCode))"
+            }
+            Get-Content -LiteralPath $report
+          }
+
+          $portable = (Resolve-Path 'release/3A_Smart_Banner_Manage.exe').Path
+          Test-BannerApp $portable (Join-Path $env:RUNNER_TEMP 'smart-banner-portable.txt')
+
+          $setup = (Resolve-Path 'release/3A_Smart_Banner_Manage_Setup.exe').Path
+          $installDir = Join-Path $env:RUNNER_TEMP 'Smart Banner Manager Test'
+          $install = Start-Process -FilePath $setup -ArgumentList @(
+            '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/DIR=`"$installDir`""
+          ) -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "Setup failed with exit $($install.ExitCode)" }
+
+          $installed = Join-Path $installDir '3A_Smart_Banner_Manage.exe'
+          Test-BannerApp $installed (Join-Path $env:RUNNER_TEMP 'smart-banner-installed.txt')
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3A_Smart_Banner_Manage
+          path: |
+            release/3A_Smart_Banner_Manage.exe
+            release/3A_Smart_Banner_Manage_Setup.exe
+          if-no-files-found: error
