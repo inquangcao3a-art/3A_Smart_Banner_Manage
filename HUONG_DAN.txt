@@ -1,3 +1,4 @@
+XOA workflow cu trong .github/workflows tren GitHub. Thay bang build-banner-manager.yml trong ZIP nay. Commit tren nhanh main, chon Actions > Build 3A Smart Banner Manage 1.0.0 DIRECT ARTIFACT FIX > Run workflow. Khong Re-run jobs cu. Artifact chua Setup.exe truc tiep tu installer, khong dung release.
 3A Smart Banner Manager 1.0.0
 Mở bằng python banner_manager.py sau khi cài requirements.txt, hoặc dùng
 workflow Build 3A Smart Banner Manager 1.0.0 để tạo EXE Windows.
