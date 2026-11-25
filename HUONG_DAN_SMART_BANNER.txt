@@ -1,0 +1,11 @@
+3A_Smart_Banner_Manage 1.0.0
+Chạy smart_banner_manager.py bằng Python có Pillow hoặc dùng 3A_Smart_Banner_Manage.exe.
+Chọn ảnh, nhập URL thư mục HTTPS công khai (ví dụ GitHub raw của repo riêng chứa banner công khai), xuất.
+Đưa ảnh có tên hash và manifest.json lên đúng thư mục đó. Chép banner_config.json vào thư mục mã nguồn khách trước lần build đầu tiên. Không đưa thư mục seller lên repo khách.
+Các lần sau chỉ cập nhật ảnh và manifest.json (ảnh trước, manifest sau). Không cần build lại. Tắt banner bằng xuất manifest disabled.
+Không có URL thật được cấu hình sẵn. Không có dịch vụ nền Windows. Một tác vụ tải hữu hạn khi mở app, không chặn UI. Nếu mất mạng giữ cache. Ngày hết hạn kiểm tra tại máy khách. Link chỉ mở khi bấm.
+
+Banner động: GIF, WebP, APNG, PNG, JPEG; tối đa 2 MB, 180 khung hình, 80 triệu pixel tổng. Ảnh tĩnh có xoay 2D hoặc sáng tối nhẹ; ảnh động giữ khung gốc. Tốc độ 0.5–2, lặp hoặc phát một lần. Không có URL hosting cấu hình sẵn.
+
+Windows: tải 3A_Smart_Banner_Manage.zip từ artifact 3A_Smart_Banner_Manage.
+Giải nén và chạy 3A_Smart_Banner_Manage_Setup.exe để cài hoặc chạy 3A_Smart_Banner_Manage.exe trực tiếp.
