@@ -5,10 +5,10 @@ VSVersionInfo(
     ),
     kids=[
         StringFileInfo([StringTable('040904B0', [
-            StringStruct('FileDescription', '3A_Smart_Banner_Manage'),
+            StringStruct('FileDescription', 'smart_banner_manager'),
             StringStruct('FileVersion', '1.1.0'),
-            StringStruct('OriginalFilename', '3A_Smart_Banner_Manage.exe'),
-            StringStruct('ProductName', '3A_Smart_Banner_Manage'),
+            StringStruct('OriginalFilename', 'smart_banner_manager.exe'),
+            StringStruct('ProductName', 'smart_banner_manager'),
             StringStruct('ProductVersion', '1.1.0')
         ])]),
         VarFileInfo([VarStruct('Translation', [1033, 1200])])

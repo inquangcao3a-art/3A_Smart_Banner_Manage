@@ -1,4 +1,4 @@
-#define AppName "3A_Smart_Banner_Manage"
+#define AppName "smart_banner_manager"
 #define AppVersion "1.1.0"
 #define AppExe AppName + ".exe"
 #ifndef SetupIcon
@@ -6,14 +6,14 @@
 #endif
 
 [Setup]
-AppId=3A_Smart_Banner_Manage.Seller
+AppId=smart_banner_manager.Seller
 AppName={#AppName}
 AppVersion={#AppVersion}
 VersionInfoVersion={#AppVersion}.0
 DefaultDirName={localappdata}\Programs\{#AppName}
 PrivilegesRequired=lowest
 OutputDir=release
-OutputBaseFilename={#AppName}_Setup
+OutputBaseFilename={#AppName}
 SetupIconFile={#SetupIcon}
 UninstallDisplayIcon={app}\{#AppExe}
 WizardStyle=modern
