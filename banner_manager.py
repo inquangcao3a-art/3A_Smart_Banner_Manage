@@ -1,117 +1,123 @@
-"""Choose a file, preview it and publish a time-limited banner."""
-from datetime import date, datetime, timedelta
+"""Seller-only banner preview and export."""
+from datetime import timedelta
 from pathlib import Path
-from queue import Empty, SimpleQueue
-from threading import Thread
+import json
+import sys
+from PIL import Image, ImageTk
 import tkinter as tk
 from tkinter import filedialog, ttk
 
-from publish_banner import publish
 from smart_banner import MAX_IMAGE, VIETNAM, decode, image_name, play, validate_manifest
+from datetime import datetime
 
 
 def main():
+    if '--self-test' in sys.argv:
+        import io
+        buf = io.BytesIO()
+        Image.new('RGB', (32, 16)).save(buf, format='PNG')
+        frames, fmt = decode(buf.getvalue())
+        assert fmt == 'PNG' and len(frames) == 1
+        assets = Path(__file__).resolve().parent / 'assets'
+        for name in ('logo.png', 'app.ico'):
+            with Image.open(assets / name) as asset:
+                asset.load()
+        return
+    if sys.platform == "win32":
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("3A.SmartBannerManager.1.0.0")
     root = tk.Tk()
-    root.title('3A Smart Banner Manager 1.1.0')
-    root.minsize(590, 310)
-    form = ttk.Frame(root, padding=20)
+    assets = Path(__file__).resolve().parent / 'assets'
+    root.iconbitmap(default=str(assets / 'app.ico')) if sys.platform == 'win32' else None
+    root.brand_logo = ImageTk.PhotoImage(Image.open(assets / 'logo.png').resize((80, 80), Image.Resampling.LANCZOS), master=root)
+    root.iconphoto(True, root.brand_logo)
+    root.title('3A Smart Banner Manager 1.0.0')
+    form = ttk.Frame(root, padding=18)
     form.pack(fill='both', expand=True)
     form.columnconfigure(1, weight=1)
     now = datetime.now(VIETNAM).date()
-    image_path = None
-    name = tk.StringVar(value='Chưa chọn ảnh')
-    end = tk.StringVar(value=(now + timedelta(days=7)).isoformat())
-    token = tk.StringVar()
+    selected = tk.StringVar()
+    start = tk.StringVar(value=now.isoformat())
+    end = tk.StringVar(value=(now + timedelta(days=30)).isoformat())
+    link = tk.StringVar()
+    speed = tk.StringVar(value='1.0')
+    audience = tk.StringVar(value='Tất cả khách')
+    effect = tk.StringVar(value='Không')
+    enabled = tk.BooleanVar(value=True)
+    loop = tk.BooleanVar(value=True)
     status = tk.StringVar()
-    responses = SimpleQueue()
-    preview = None
+    preview_window = None
+    audience_keys = {'Tất cả khách': 'all', 'Đã kích hoạt': 'licensed', 'Đang dùng thử': 'trial'}
+    effect_keys = {'Không': 'none', 'Xoay 360° 2D': 'rotate', 'Nhấp sáng nhẹ': 'glow',
+                   'Quét sáng': 'sweep', 'Phóng to – thu nhỏ': 'zoom'}
 
-    def choose():
-        nonlocal image_path
+    def select():
         path = filedialog.askopenfilename(parent=root, filetypes=[('Ảnh banner', '*.png *.jpg *.jpeg *.gif *.webp *.apng')])
         if path:
-            image_path = Path(path)
-            name.set(image_path.name)
-            status.set('')
+            selected.set(path)
 
     def prepare():
-        if image_path is None:
-            raise ValueError('Hãy chọn ảnh trước.')
-        today = datetime.now(VIETNAM).date()
-        last = date.fromisoformat(end.get().strip())
-        with image_path.open('rb') as source:
-            payload = source.read(MAX_IMAGE + 1)
+        if not enabled.get():
+            return validate_manifest({'schema': 1, 'enabled': False}), b'', []
+        if not selected.get():
+            raise ValueError('Hãy chọn ảnh banner.')
+        with Path(selected.get()).open('rb') as file:
+            payload = file.read(MAX_IMAGE + 1)
         frames, fmt = decode(payload)
-        manifest = validate_manifest({
-            'schema': 1, 'enabled': True, 'audience': 'all', 'effect': 'none',
-            'speed': 1, 'loop': True, 'start': today.isoformat(),
-            'end': last.isoformat(), 'image': image_name(payload, fmt), 'link': '',
+        data = validate_manifest({
+            'schema': 1, 'enabled': True, 'audience': audience_keys[audience.get()],
+            'effect': effect_keys[effect.get()], 'speed': float(speed.get()), 'loop': loop.get(),
+            'start': start.get(), 'end': end.get(), 'image': image_name(payload, fmt),
+            'link': link.get().strip(),
         })
-        return manifest, payload, frames
+        status.set(f'{fmt} · {len(frames)} khung hình · {len(payload) / 1024:.0f} KB')
+        return data, payload, frames
 
-    def show_preview():
-        nonlocal preview
+    def preview():
+        nonlocal preview_window
         try:
-            manifest, _, frames = prepare()
-            if preview is not None and preview.winfo_exists():
-                preview.tk.call(preview.protocol('WM_DELETE_WINDOW'))
-            preview = play(root, frames, manifest)
-        except (OSError, ValueError) as error:
-            status.set(str(error))
-
-    def complete(disable=False):
-        credential = token.get().strip()
-        if not credential:
-            status.set('Hãy nhập token GitHub có quyền Contents: Read and write.')
-            return
-        try:
-            if disable:
-                manifest, payload = {'schema': 1, 'enabled': False}, b''
-            else:
-                manifest, payload, _ = prepare()
-        except (OSError, ValueError) as error:
-            status.set(str(error))
-            return
-        complete_button.state(['disabled'])
-        disable_button.state(['disabled'])
-        status.set('Đang cập nhật GitHub…')
-
-        def worker():
-            try:
-                commit = publish(credential, manifest, payload)
-                responses.put(f'Hoàn thành · GitHub commit {commit[:8]}')
-            except ValueError as error:
-                responses.put(str(error))
-            except (OSError, KeyError):
-                responses.put('Chưa xác nhận được cập nhật. Kiểm tra GitHub trước khi thử lại.')
-
-        def poll():
-            try:
-                status.set(responses.get_nowait())
-            except Empty:
-                root.after(100, poll)
+            data, _, frames = prepare()
+            if not frames:
+                status.set('Banner đang tắt.')
                 return
-            complete_button.state(['!disabled'])
-            disable_button.state(['!disabled'])
+            if preview_window is not None and preview_window.winfo_exists():
+                preview_window.tk.call(preview_window.protocol('WM_DELETE_WINDOW'))
+            preview_window = play(root, frames, data)
+            preview_window.title('3A Smart Banner Manager – Xem trước')
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            status.set(f'Không thể xem trước: {exc}')
 
-        Thread(target=worker, daemon=True).start()
-        root.after(100, poll)
+    def export():
+        try:
+            data, payload, _ = prepare()
+            destination = filedialog.askdirectory(parent=root)
+            if not destination:
+                return
+            target = Path(destination)
+            if data['enabled']:
+                (target / data['image']).write_bytes(payload)
+            (target / 'banner.json').write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            status.set('Đã xuất. Đăng ảnh lên trước, rồi đăng banner.json.')
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            status.set(f'Không thể xuất: {exc}')
 
-    ttk.Label(form, text='3A Smart Banner Manager', font=('Segoe UI', 19, 'bold')).grid(row=0, column=0, columnspan=3, sticky='w')
-    ttk.Label(form, text='Khuyến mãi trong khung giá · Dùng thử và đã kích hoạt').grid(row=1, column=0, columnspan=3, sticky='w', pady=(3, 14))
-    ttk.Button(form, text='Chọn ảnh', command=choose).grid(row=2, column=0, sticky='w')
-    ttk.Label(form, textvariable=name, wraplength=350).grid(row=2, column=1, sticky='w', padx=8)
-    ttk.Button(form, text='Xem trước', command=show_preview).grid(row=2, column=2, sticky='e')
-    ttk.Label(form, text='Ngày cuối (YYYY-MM-DD)').grid(row=3, column=0, sticky='w', pady=(12, 3))
-    ttk.Entry(form, textvariable=end).grid(row=3, column=1, columnspan=2, sticky='ew', padx=(8, 0), pady=(12, 3))
-    ttk.Label(form, text='Token GitHub').grid(row=4, column=0, sticky='w', pady=3)
-    ttk.Entry(form, textvariable=token, show='*').grid(row=4, column=1, columnspan=2, sticky='ew', padx=(8, 0), pady=3)
-    ttk.Label(form, text='Hết ngày cuối theo giờ Việt Nam, ứng dụng tự hiện lại banner giá thường.', wraplength=510).grid(row=5, column=0, columnspan=3, sticky='w', pady=(7, 8))
-    disable_button = ttk.Button(form, text='Kết thúc sớm', command=lambda: complete(True))
-    disable_button.grid(row=6, column=0, sticky='w')
-    complete_button = ttk.Button(form, text='Hoàn thành', command=complete)
-    complete_button.grid(row=6, column=2, sticky='e')
-    ttk.Label(form, textvariable=status, wraplength=510).grid(row=7, column=0, columnspan=3, sticky='w', pady=(9, 0))
+    ttk.Label(form, text='3A Smart Banner Manager 1.0.0', image=root.brand_logo, compound='left', font=('Segoe UI', 18, 'bold')).grid(row=0, column=0, columnspan=3, sticky='w', pady=(0, 10))
+    ttk.Entry(form, textvariable=selected, width=45, state='readonly').grid(row=1, column=0, columnspan=2, sticky='ew')
+    ttk.Button(form, text='Chọn ảnh', command=select).grid(row=1, column=2, padx=(6, 0))
+    for row, (title, value, choices) in enumerate((
+        ('Đối tượng', audience, tuple(audience_keys)), ('Hiệu ứng', effect, tuple(effect_keys)),
+        ('Tốc độ', speed, ('0.5', '0.75', '1.0', '1.25', '1.5', '2.0')),
+        ('Bắt đầu (YYYY-MM-DD)', start, ()), ('Kết thúc (YYYY-MM-DD)', end, ()),
+        ('Đường dẫn HTTPS', link, ()),
+    ), start=2):
+        ttk.Label(form, text=title).grid(row=row, column=0, sticky='w', pady=5)
+        field = ttk.Combobox(form, textvariable=value, values=choices, state='readonly') if choices else ttk.Entry(form, textvariable=value)
+        field.grid(row=row, column=1, columnspan=2, sticky='ew')
+    ttk.Checkbutton(form, text='Hiển thị banner', variable=enabled).grid(row=8, column=0, sticky='w')
+    ttk.Checkbutton(form, text='Lặp chuyển động', variable=loop).grid(row=8, column=1, sticky='w')
+    ttk.Label(form, textvariable=status, wraplength=470).grid(row=9, column=0, columnspan=3, sticky='w', pady=8)
+    ttk.Button(form, text='Xem trước', command=preview).grid(row=10, column=0, sticky='w')
+    ttk.Button(form, text='Xuất banner', command=export).grid(row=10, column=2, sticky='e')
     root.mainloop()
 
 

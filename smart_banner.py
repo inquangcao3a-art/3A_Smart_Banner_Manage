@@ -168,7 +168,7 @@ def play(parent, frames, manifest, link_action=None):
     import math
 
     window = tk.Toplevel(parent)
-    window.title('smart_banner_manager')
+    window.title('3A Smart Banner PRO')
     bg = '#151C27'
     window.configure(bg=bg)
     width = max(frame.width for frame, _ in frames)
