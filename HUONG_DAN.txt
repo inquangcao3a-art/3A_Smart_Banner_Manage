@@ -1,27 +1,3 @@
-smart_banner_manager 1.1.0
-
-Chọn PNG, JPG, GIF, WebP hoặc APNG, nhập ngày cuối và bấm Đăng banner.
-GIF/WebP/APNG giữ chuyển động trong ảnh. Kích thước đề xuất 880 × 260 px, tối
-đa 2 MB và 180 khung. Xem trước sẽ hiển thị ảnh trước khi đăng.
-
-Dùng token GitHub giới hạn cho kho inquangcao3a-art/3A_Banner_Public, với quyền
-Contents: Read and write. Token chỉ giữ trong phiên đang mở. Khi bấm Đăng banner,
-công cụ đăng ảnh rồi cập nhật promotion.json. Nút Tắt banner tắt khuyến mãi.
-Ảnh cũ và manifest cũ ở GitHub không bị xóa.
-
-Khách cần cài AI Font Finder PRO 7.1.9 một lần. Sau đó mỗi lần mở ứng dụng,
-hệ thống kiểm tra một lần. Khuyến mãi nằm trong khung giá và kết thúc vào
-00:00 sau ngày cuối theo giờ Việt Nam. Cả dùng thử và đã kích hoạt đều thấy ảnh.
-
-ĐÓNG GÓI TRÊN GITHUB WEB
-Tải nội dung ZIP lên thư mục gốc của repo smart_banner_manager. Giữ nguyên
-assets/ và .github/workflows/build-windows.yml. Chạy workflow
-Build smart_banner_manager 1.1.0, rồi tải artifact smart_banner_manager.
-ZIP artifact smart_banner_manager.zip chứa bộ cài smart_banner_manager.exe
-và bản chạy trực tiếp portable/smart_banner_manager.exe.
-Thử chọn GIF trong examples/ và bấm Xem trước. GIF mẫu 440 × 160 px.
-Xem trước có thể dùng khi chưa nhập token. Chỉ Đăng banner và Tắt banner
-mới gửi yêu cầu cập nhật GitHub.
-
-Màn hình hỏi token khi đăng hoặc tắt banner lần đầu trong phiên.
-Đợi thông báo Đã cập nhật promotion.json rồi thoát hẳn và mở lại AI Font Finder PRO.
+3A_Smart_Banner_Manage | 1.0.1
+Xóa workflow cũ trong repository này, upload toàn bộ nội dung ZIP vào thư mục gốc, bao gồm .github/workflows và assets. Commit vào nhánh chính. Actions > 3A_Smart_Banner_Manage > Run workflow. Không Re-run jobs cũ. Artifact 3A_Smart_Banner_Manage chỉ chứa 3A_Smart_Banner_Manage_Setup.exe.
+Ảnh đề xuất 880 × 320 px, tối đa 2 MiB, 180 khung. Chọn ảnh, đối tượng, thời hạn, hiệu ứng, tốc độ, vòng lặp và link HTTPS. Xem trước hoặc Xuất banner. Đăng ảnh lên trước rồi banner.json lên cùng thư mục HTTPS. Muốn tắt banner, bỏ chọn Hiển thị banner và đăng banner.json mới. Chương trình khách cần được cấu hình URL manifest riêng.

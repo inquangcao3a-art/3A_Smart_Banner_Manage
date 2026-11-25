@@ -25,13 +25,13 @@ def main():
         return
     if sys.platform == "win32":
         import ctypes
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("3A.SmartBannerManager.1.0.0")
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("3A_Smart_Banner_Manage")
     root = tk.Tk()
     assets = Path(__file__).resolve().parent / 'assets'
     root.iconbitmap(default=str(assets / 'app.ico')) if sys.platform == 'win32' else None
     root.brand_logo = ImageTk.PhotoImage(Image.open(assets / 'logo.png').resize((80, 80), Image.Resampling.LANCZOS), master=root)
     root.iconphoto(True, root.brand_logo)
-    root.title('3A Smart Banner Manager 1.0.0')
+    root.title('3A_Smart_Banner_Manage 1.0.1')
     form = ttk.Frame(root, padding=18)
     form.pack(fill='both', expand=True)
     form.columnconfigure(1, weight=1)
@@ -83,7 +83,7 @@ def main():
             if preview_window is not None and preview_window.winfo_exists():
                 preview_window.tk.call(preview_window.protocol('WM_DELETE_WINDOW'))
             preview_window = play(root, frames, data)
-            preview_window.title('3A Smart Banner Manager – Xem trước')
+            preview_window.title('3A_Smart_Banner_Manage – Xem trước')
         except (OSError, ValueError, KeyError, TypeError) as exc:
             status.set(f'Không thể xem trước: {exc}')
 
@@ -101,7 +101,7 @@ def main():
         except (OSError, ValueError, KeyError, TypeError) as exc:
             status.set(f'Không thể xuất: {exc}')
 
-    ttk.Label(form, text='3A Smart Banner Manager 1.0.0', image=root.brand_logo, compound='left', font=('Segoe UI', 18, 'bold')).grid(row=0, column=0, columnspan=3, sticky='w', pady=(0, 10))
+    ttk.Label(form, text='3A_Smart_Banner_Manage 1.0.1', image=root.brand_logo, compound='left', font=('Segoe UI', 18, 'bold')).grid(row=0, column=0, columnspan=3, sticky='w', pady=(0, 10))
     ttk.Entry(form, textvariable=selected, width=45, state='readonly').grid(row=1, column=0, columnspan=2, sticky='ew')
     ttk.Button(form, text='Chọn ảnh', command=select).grid(row=1, column=2, padx=(6, 0))
     for row, (title, value, choices) in enumerate((
