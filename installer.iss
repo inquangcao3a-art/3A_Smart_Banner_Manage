@@ -1,22 +1,29 @@
+#define AppName "smart_banner_manager"
+#define AppVersion "1.1.0"
+#define AppExe AppName + ".exe"
+#ifndef SetupIcon
+  #define SetupIcon "assets\icon.ico"
+#endif
+
 [Setup]
-AppId=3A.SmartBannerManager
-AppName=3A Smart Banner Manager
-AppVersion=1.0.0
-AppVerName=3A Smart Banner Manager 1.0.0
-AppPublisher=3A
-DefaultDirName={localappdata}\Programs\3A Smart Banner Manager
-DefaultGroupName=3A Smart Banner Manager
+AppId=smart_banner_manager.Seller
+AppName={#AppName}
+AppVersion={#AppVersion}
+VersionInfoVersion={#AppVersion}.0
+DefaultDirName={localappdata}\Programs\{#AppName}
 PrivilegesRequired=lowest
-OutputDir=installer
-OutputBaseFilename=3A_Smart_Banner_Manage_Setup
-SetupIconFile=assets\app.ico
-UninstallDisplayIcon={app}\3A_Smart_Banner_Manage.exe
-Compression=lzma2
-SolidCompression=yes
+OutputDir=release
+OutputBaseFilename={#AppName}
+SetupIconFile={#SetupIcon}
+UninstallDisplayIcon={app}\{#AppExe}
+WizardStyle=modern
+
 [Files]
-Source: "dist\3A_Smart_Banner_Manage.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
+
+[Tasks]
+Name: desktopicon; Description: "Create a desktop shortcut"
+
 [Icons]
-Name: "{group}\3A Smart Banner Manager"; Filename: "{app}\3A_Smart_Banner_Manage.exe"
-Name: "{autodesktop}\3A Smart Banner Manager"; Filename: "{app}\3A_Smart_Banner_Manage.exe"
-[Run]
-Filename: "{app}\3A_Smart_Banner_Manage.exe"; Description: "Launch 3A Smart Banner Manager"; Flags: nowait postinstall skipifsilent
+Name: "{userprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; IconFilename: "{app}\{#AppExe}"
+Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; IconFilename: "{app}\{#AppExe}"; Tasks: desktopicon

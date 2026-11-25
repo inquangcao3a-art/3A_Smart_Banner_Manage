@@ -1,20 +1,27 @@
-XOA workflow cu trong .github/workflows tren GitHub. Thay bang build-banner-manager.yml trong ZIP nay. Commit tren nhanh main, chon Actions > Build 3A Smart Banner Manage 1.0.0 DIRECT ARTIFACT FIX > Run workflow. Khong Re-run jobs cu. Artifact chua Setup.exe truc tiep tu installer, khong dung release.
-3A Smart Banner Manager 1.0.0
-Mở bằng python banner_manager.py sau khi cài requirements.txt, hoặc dùng
-workflow Build 3A Smart Banner Manager 1.0.0 để tạo EXE Windows.
-Ảnh đề xuất: 880 × 320 px, tối đa 2 MB và 180 khung. Hỗ trợ PNG/JPEG/GIF/WebP/APNG.
-Chọn ảnh, đối tượng, thời hạn theo giờ Việt Nam, hiệu ứng, vòng lặp và link.
-Bấm Xem trước hoặc Xuất banner. Đưa ảnh xuất ra và banner.json lên cùng một thư
-mục HTTPS. Đăng ảnh trước, rồi thay banner.json. Muốn tắt, bỏ chọn Hiển thị
-banner và đăng banner.json mới. Chương trình khách dùng địa chỉ manifest cố
-định trong banner_config.py và tải lại khi mở ứng dụng.
+smart_banner_manager 1.1.0
 
-BẢN SỬA ĐÓNG GÓI:
-Dùng repository riêng hoặc xóa workflow cũ của AI Font Finder nếu không còn cần.
-Upload toàn bộ nội dung ZIP (bao gồm .github/workflows và assets) vào thư mục gốc.
-Actions > Build 3A Smart Banner Manager 1.0.0 Setup > Run workflow.
-Tải Artifacts, giải nén và chạy 3A_Smart_Banner_Manage_Setup.exe.
-Không dùng EXE AI_Font_Finder_PRO cũ. Banner Manager không cần NumPy.
-Logo Robot cầm banner, có thể thay assets/logo.png và assets/app.ico.
+Chọn PNG, JPG, GIF, WebP hoặc APNG, nhập ngày cuối và bấm Đăng banner.
+GIF/WebP/APNG giữ chuyển động trong ảnh. Kích thước đề xuất 880 × 260 px, tối
+đa 2 MB và 180 khung. Xem trước sẽ hiển thị ảnh trước khi đăng.
 
-FIX: Xoa cac workflow cu trong repository nay (chi repository Banner), giu build-banner-manager.yml. Ghi de ca installer.iss va setup.iss. Chay workflow Build 3A Smart Banner Manage 1.0.0 FIX tu branch da upload. Khong Re-run job cu.
+Dùng token GitHub giới hạn cho kho inquangcao3a-art/3A_Banner_Public, với quyền
+Contents: Read and write. Token chỉ giữ trong phiên đang mở. Khi bấm Đăng banner,
+công cụ đăng ảnh rồi cập nhật promotion.json. Nút Tắt banner tắt khuyến mãi.
+Ảnh cũ và manifest cũ ở GitHub không bị xóa.
+
+Khách cần cài AI Font Finder PRO 7.1.9 một lần. Sau đó mỗi lần mở ứng dụng,
+hệ thống kiểm tra một lần. Khuyến mãi nằm trong khung giá và kết thúc vào
+00:00 sau ngày cuối theo giờ Việt Nam. Cả dùng thử và đã kích hoạt đều thấy ảnh.
+
+ĐÓNG GÓI TRÊN GITHUB WEB
+Tải nội dung ZIP lên thư mục gốc của repo smart_banner_manager. Giữ nguyên
+assets/ và .github/workflows/build-windows.yml. Chạy workflow
+Build smart_banner_manager 1.1.0, rồi tải artifact smart_banner_manager.
+ZIP artifact smart_banner_manager.zip chứa bộ cài smart_banner_manager.exe
+và bản chạy trực tiếp portable/smart_banner_manager.exe.
+Thử chọn GIF trong examples/ và bấm Xem trước. GIF mẫu 440 × 160 px.
+Xem trước có thể dùng khi chưa nhập token. Chỉ Đăng banner và Tắt banner
+mới gửi yêu cầu cập nhật GitHub.
+
+Màn hình hỏi token khi đăng hoặc tắt banner lần đầu trong phiên.
+Đợi thông báo Đã cập nhật promotion.json rồi thoát hẳn và mở lại AI Font Finder PRO.
