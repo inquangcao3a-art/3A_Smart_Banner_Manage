@@ -1,5 +1,5 @@
 #define AppName "3A_Smart_Banner_Manage"
-#define AppVersion "1.0.0"
+#define AppVersion "1.1.0"
 #define AppExe AppName + ".exe"
 #ifndef SetupIcon
   #define SetupIcon "assets\icon.ico"
